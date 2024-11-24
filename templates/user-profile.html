@@ -1,0 +1,73 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User Profile</title>
+        <link rel="stylesheet" href="/templates/css/custom-style.css">
+        <link href="/templates/css/style.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    </head>
+    <body class="bg-custom-darkest text-custom-light">
+
+        <div class="max-w-2xl mx-auto p-6">
+            <div class="bg-custom-primary rounded-lg shadow-lg p-4 flex flex-col items-center space-y-4">
+                <!-- Profile Picture -->
+                <div class="w-[150px] h-[150px] md:w-[300px] md:h-[300px] rounded-full bg-gray-600 flex items-center justify-center bg-no-repeat bg-center bg-cover"
+                style="background-image: url('/uploads/no-profile.jpeg');">               
+                </div>
+                <h1 class="text-xl md:text-2xl font-bold">@{{userdata.username}}</h1>
+                <div class="inline-flex space-x-4">
+                    <button title="See all {{userdata.connections|number_format}} connections" class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-custom-secondary ring-2 ring-inset ring-custom-secondary hover:text-custom-light hover:bg-custom-darkest hover:ring-custom-darkest">
+                        <span class="material-symbols-rounded text-white text-xs">
+                            groups
+                        </span>
+                        <span class="font-medium ml-1 text-white text-xs"> {{userdata.connections|number_format}}</span>
+                    </button>
+                    <button title="Connect with {{user.username}}" id="connect-button" class="flex items-center rounded-full px-3 py-1 text-sm font-medium text-custom-secondary ring-2 ring-inset ring-custom-secondary hover:text-custom-light hover:bg-custom-darkest hover:ring-custom-darkest">
+                        <span data-loader>
+                            <span class="loader"></span>
+                            <span>Please wait...</span>
+                        </span>
+                        <span data-content class="inline-flex items-center ">
+                            <span class="material-symbols-rounded text-white">
+                                add_link
+                            </span>
+                            <span class="font-medium ml-1 text-white text-xs">Connect</span> 
+                        </span>                                  
+                    </button>
+                </div>            
+            </div>
+
+        </div>
+    </body>
+<script src="/templates/js/common.js"></script>
+<script>
+    const username = `{{userdata.username}}`;
+    document.getElementById('connect-button')?.addEventListener( 'click' , function() {
+        this.setAttribute('data-loading' , 1);
+
+        const data = new FormData;
+        data.append('action' , 'new-connection');
+        data.append('username' , username);
+
+        ajax_request( `${AJAX_ENDPOINT}/connections` , {
+            method: "POST",
+            body: data,
+        } , (response) => {
+            
+            this.removeAttribute('data-loading');
+
+            show_toaster( response.message , response.success );
+
+            if( response.success ) {
+
+            }
+        } , (e) => {
+            this.removeAttribute('data-loading');
+            show_toaster( e , false );
+        } );
+        
+    } )
+</script>
+</html>

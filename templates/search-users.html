@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Search</title>
+    <link href="/templates/css/style.css" rel="stylesheet">
+    <link href="/templates/css/custom-style.css" rel="stylesheet">
+    <template id="userlist-item">
+        <!-- Sample user search result item -->
+        <a href="" profilelink class="bg-custom-primary rounded-lg p-4 flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-full bg-gray-600 flex-shrink-0">
+                <img userimage-field src="/uploads/no-profile.jpeg" alt="User profile"
+                    class="rounded-full w-full h-full object-cover" />
+            </div>
+            <div class="flex flex-col">
+                <span class="font-bold text-lg" username-field>@username</span>
+                <span class="text-sm text-gray-400" userbio-field>User bio or tagline</span>
+            </div>
+        </a>
+
+    </template>
+</head>
+
+<body class="bg-custom-darkest text-custom-light">
+
+    <div class="max-w-3xl mx-auto p-6">
+        <!-- Search Field -->
+        <div class="flex justify-center mb-6 w-full">
+            <input type="text" id="search-input" autofocus placeholder="Search for users..."
+                class="w-full md:w-2/3 bg-custom-secondary text-custom-darkest rounded-full px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-custom-primary">
+        </div>
+
+        <!-- Search Results -->
+        <div id="search-results" class="space-y-4">
+
+        </div>
+        <div id="search-results-loader" class="h-[100px] w-full flex justify-center">
+            <span data-loader class="h-full w-fit">
+                <span class="loader"></span>
+                <span>Searching users...</span>
+            </span>
+            <span data-content>
+
+            </span>
+        </div>
+    </div>
+
+    <script src="/templates/js/common.js"></script>
+    <script>
+
+        const userlistitem_template = document.getElementById('userlist-item');
+        const search_loader = document.getElementById('search-results-loader');
+        const search_input = document.getElementById('search-input');
+        const search_results = document.getElementById('search-results');
+
+        search_input.oninput = debounce(e => {
+
+            const search_q = search_input.value.trim();
+
+            if (!search_q) return;
+
+            search_loader.setAttribute('data-loading', 1);
+
+            const endpoint = encodeURI(`${AJAX_ENDPOINT}/search-user?q=` + search_input.value);
+
+            ajax_request(endpoint, {},
+                response => {
+
+                    search_loader.removeAttribute('data-loading');
+
+
+                    if( !response.success ) return;
+
+                    search_results.innerHTML = '';
+
+                    response.data.forEach(user => {
+
+                        const resultItem = userlistitem_template.content.cloneNode(true);
+
+                        resultItem.querySelector('[profilelink]').href = `/users/${user.username}`;
+                        resultItem.querySelector('[profilelink]').alt = user.username;
+                        resultItem.querySelector('[username-field]').textContent = user.username;
+                        resultItem.querySelector('[userbio-field]').textContent = user.bio;
+                        resultItem.querySelector('[userimage-field]').src = `${UPLOADS_PATH}/${user.profile_picture}`;
+
+                        search_results.appendChild(resultItem);
+
+                    })
+
+                },
+                e => {
+
+                    search_loader.removeAttribute('data-loading');
+                    show_toaster(e, false);
+
+                }
+            )
+
+        }, 200);
+
+    </script>
+
+</body>
+
+</html>

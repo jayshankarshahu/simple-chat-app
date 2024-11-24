@@ -1,0 +1,8 @@
+{
+    "require": {
+        "cboden/ratchet": "^0.4.4",
+        "twig/twig": "^3.13",
+        "mongodb/mongodb": "^1.19",
+        "firebase/php-jwt": "^6.10"
+    }
+}
